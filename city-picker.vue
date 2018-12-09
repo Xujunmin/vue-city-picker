@@ -1,6 +1,6 @@
 <template>
 <div class="vue-city-picker" @mouseout="endChoice" @mouseover="startMouseOver">
-	<input v-show="!noInput" type="text" autocomplete="off" disableautocomplete :name="field" :id="field" :value="currCityName" :placeholder="placeholder" @focus="startChoice" @keypress="startChoice" @blur="endChoice" v-el:input>
+	<input v-show="!noInput" type="text" autocomplete="off" disableautocomplete :name="field" :id="field" :value="currCityName" :placeholder="placeholder" @focus="startChoice" @keypress="startChoice" @blur="endChoice" ref='input'>
 	<!--城市选择-->
 	<div class="vcp-panel" v-show="cityPanelIsShow">
 		<h5>城市选择</h5>
@@ -8,10 +8,11 @@
 			<li :class="{'z-on': item==tagKey}" v-for="item in tagsArr" @click="choiceTag(item)">{{ item }}</li>
 		</ul>
 		<div class="vcp-list">
-			<div :class="{'z-hot': initial == 'hot'}" v-for="(initial, citys) in cityList" v-show="currTagIncludes(initial)">
-				<h6 v-if="initial != 'hot'">{{ initial }}</h6>
+			<div :class="{'z-hot': initial == 'hot'}" v-for="(initial, citys) in cityList" v-show="currTagIncludes(citys)">
+				<!--<h6 v-if="initial != 'hot'">{{ initial }}</h6>-->
+				
 				<ul>
-					<li v-for="v in citys" @click="choiceCity(v.id)" :title="v.name">{{ v.name }}</li>
+					<li v-for="v in initial" @click="choiceCity(v.id)" :title="v.name">{{ v.name }}</li>
 				</ul>
 			</div>
 		</div>
@@ -100,7 +101,7 @@ export default {
 				tags
 			} = this;
 			return tags[tagKey];
-		}
+		},
 	},
 	methods: {
 		// 列表是否属于当前标签
@@ -122,13 +123,13 @@ export default {
 			this.cityPanelIsShow = true;
 		},
 		choiceCity(id) {
-			this.value = id;
+			this.$emit('change', id);
 			this.immEndChoice();
 		},
 		// 鼠标离开城市选择区域时超过一定时间，关闭城市面板
 		endChoice(e) {
-			let that = this,
-				inputEle = that.$els.input;
+			let that = this;
+			let	inputEle = this.$refs.input;
 			if (e.type == 'mouseout') {
 				that.isMouseOver = false;
 			}
